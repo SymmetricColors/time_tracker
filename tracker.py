@@ -1,25 +1,34 @@
-import datetime
-import time
-import sys
-import jalali
-import sqlite3
+import argparse
+import track
 import dataSource
-def main():
-    try:
-        current_work = sys.argv[1]
-    except IndexError:
-        print("please specify your project")
-        exit(1)
-    dt=datetime.datetime.now()
-    try:
-        time.sleep(100000000000000)
-    except KeyboardInterrupt:
-        dt2=datetime.datetime.now()
-        current_georgian_date="{0}-{1}-{2}".format(dt2.year,dt2.month,dt2.day)
-        current_persian_date=jalali.Gregorian(dt.year,dt.month,dt.day).persian_string()
-        duration=(dt2-dt).total_seconds()
-        date=(current_georgian_date,str(dt),str(dt2),duration,current_work,current_persian_date)
-        datasource=dataSource.DataSource('working_dates.db')
-        datasource.insert_data(date)
+class time_tracker():
 
-main()
+    def __init__(self):
+        parser=argparse.ArgumentParser(description="my working time tracker")
+        parser.add_argument("-t", action='store',help="track the specified project time")
+        parser.add_argument("-s" , action='store',help="show worked hours for specified project" )
+        parser.add_argument("-a", action="store",help="show all the times for specified project")
+        args=parser.parse_args()
+
+        if args.t:
+            track.main(args.t)
+
+        if args.s:
+            datasource=dataSource.DataSource('working_dates.db')
+            times=datasource.get_data(args.s)
+            sum_of_seconds=0
+            for time in times:
+                sum_of_seconds+=time[3]
+            print(sum_of_seconds/3600)
+
+        if args.a:
+            datasource=dataSource.DataSource('working_dates.db')
+            times=datasource.get_data(args.a)
+            for time in times:
+                temp=str(time)
+                temp=temp.replace('u','')
+                temp=temp.replace('\'','')
+                temp=temp.replace('(','')
+                temp=temp.replace(')','')
+                print(temp)
+a=time_tracker()

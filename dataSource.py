@@ -9,7 +9,9 @@ class DataSource():
         self.conn = sqlite3.connect(dbname)
         self.c = self.conn.cursor()
     def get_data(self,projec_name):
-        self.c.execute('select * from dates where project ==')
+        self.c.execute('select * from dates where project =?',(projec_name,))
+        rows=self.c.fetchall()
+        return rows
     def insert_data(self,date):
         self.c.execute('insert into dates values (?,?,?,?,?,? );',date)
         self.conn.commit()
